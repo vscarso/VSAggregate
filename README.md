@@ -1,29 +1,5 @@
 📘 Documentação do Componente TVSAggregate
 1. Instalação no Lazarus
-Passo a passo
-Criar a unit
-
-Salve o código do componente em um arquivo chamado VSAggregate.pas.
-
-Criar um pacote
-
-No Lazarus, vá em Pacotes → Novo Pacote.
-
-Nome sugerido: VSComponents.lpk.
-
-Adicionar a unit ao pacote
-
-Clique em Adicionar → Unit existente.
-
-Selecione VSAggregate.pas.
-
-Configurar dependências do pacote
-
-No editor do pacote, em Requisitos, adicione:
-
-LCL (para integração com a IDE).
-
-FCL (para suporte a DB e datasets).
 
 Instalar o pacote
 
