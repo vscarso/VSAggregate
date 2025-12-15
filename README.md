@@ -1,114 +1,64 @@
-📘 Documentação do Componente TVSAggregate
-1. Instalação no Lazarus
+📘 Documentação – TVSAggregate
+O TVSAggregate é um componente para Lazarus/Free Pascal que calcula totais de campos numéricos em um TDataSet. Ele facilita operações de soma, média, contagem, máximo e mínimo sobre os dados.
 
-Instalar o pacote
+🚀 Instalação
+Adicione as units VSAggregate.pas e VSAggregateEditors.pas ao seu pacote no Lazarus.
 
-Vá em Pacotes → Instalar/Desinstalar Pacotes….
+Compile e instale o pacote.
 
-Mova VSComponents para a lista de instalados.
+O componente aparecerá na aba VSComponents.
 
-Clique em Salvar e reconstruir IDE.
+⚙️ Propriedades
+DataSet → Define o TDataSet principal usado pelo componente.
 
-Reinicie o Lazarus.
+Sources → Coleção de campos numéricos selecionados para agregação.
 
-👉 Após isso, o componente TVSAggregate aparecerá na paleta VSComponents.
+AggregateKind → Tipo de agregação (akSum, akAvg, akCount, akMax, akMin).
 
-2. Dependências
-LCL → Biblioteca de componentes visuais do Lazarus.
+AutoRecalc → Se verdadeiro, recalcula automaticamente ao modificar o DataSet.
 
-FCL-DB → Biblioteca de acesso a dados (necessária para TDataSet).
+DecimalPlaces → Número de casas decimais para exibição.
 
-ZeosLib (opcional) → Se você usa TZQuery ou outros componentes Zeos, o TVSAggregate funciona normalmente, pois herda de TDataSet.
+🛠️ Métodos
+CalcularTotal → Executa o cálculo manualmente. Útil quando AutoRecalc = False.
 
-3. Propriedades
-Propriedade	Tipo	Descrição
-Sources	TSumSources	Coleção de datasets/campos de origem. Cada item tem DataSet + FieldName.
-TargetDataSet	TDataSet	Dataset de destino (ex.: cabeçalho da nota).
-TargetFieldName	string	Campo do dataset de destino onde o total será gravado.
-AutoRecalc	Boolean	Se True, recalcula automaticamente quando os datasets mudam.
-AggregateKind	TAggregateKind	Tipo de agregação: akSum, akAvg, akCount, akMax, akMin.
-DecimalPlaces	Integer	Número de casas decimais no resultado.
-TotalValue	Double	Valor calculado (somente leitura).
-4. Métodos
-CalcularTotal
+Total(FieldName: string): Variant → Retorna o total calculado para um campo específico.
 
-Percorre todos os datasets configurados em Sources.
+🎯 Eventos
+OnAfterCalculate → Disparado após o cálculo dos totais.
 
-Aplica o tipo de agregação (AggregateKind).
+📊 Como acessar os valores
+TotalValue → Soma geral de todos os campos configurados.
 
-Atualiza TotalValue.
-
-Dispara o evento OnAfterCalculate.
-
-GravarTotal
-
-Grava o valor de TotalValue no campo definido em TargetFieldName do TargetDataSet.
-
-Se o dataset não estiver em edição, entra em Edit e dá Post.
-
-5. Eventos
-OnAfterCalculate
-
-Disparado sempre que o cálculo termina.
-
-Útil para atualizar a interface ou executar lógica adicional.
+Total('Campo') → Soma específica de um campo.
 
 Exemplo:
-
 pascal
-procedure TForm1.VSaggregateAfterCalculate(Sender: TObject);
+procedure TForm1.FormShow(Sender: TObject);
 begin
-  LabelTotal.Caption := FloatToStr(VSaggregate.TotalValue);
-end;
-6. Exemplo de uso
-Configuração no Object Inspector
-Sources[0].DataSet = ZQueryItens
-
-Sources[0].FieldName = Valor
-
-Sources[1].DataSet = ZQueryImpostos
-
-Sources[1].FieldName = Aliquota
-
-TargetDataSet = ZQueryNota
-
-TargetFieldName = TotalNota
-
-AggregateKind = akSum
-
-DecimalPlaces = 2
-
-AutoRecalc = True
-
-Código
-pascal
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-  VSaggregate.OnAfterCalculate := @VSaggregateAfterCalculate;
+  ZQueryProdutos.Open;
+  VSAggregate1.DataSet := ZQueryProdutos;
+  VSAggregate1.AutoRecalc := True;
 end;
 
-procedure TForm1.ButtonCalcularClick(Sender: TObject);
+procedure TForm1.Button1Click(Sender: TObject);
 begin
-  VSaggregate.CalcularTotal;
-  ShowMessage('Total calculado: ' + FloatToStr(VSaggregate.TotalValue));
+  ShowMessage('Total Valor: ' + VarToStr(VSAggregate1.Total('VALOR')));
+  ShowMessage('Total Quantidade: ' + VarToStr(VSAggregate1.Total('QUANTIDADE')));
 end;
 
-procedure TForm1.ButtonGravarClick(Sender: TObject);
+procedure TForm1.VSAggregate1AfterCalculate(Sender: TObject);
 begin
-  VSaggregate.GravarTotal;
+  LabelTotal.Caption := 'Total geral: ' + FloatToStr(VSAggregate1.TotalValue);
 end;
+📂 Exportação/Importação
+Sources.ExportToCSV(FileName) → Exporta os campos selecionados para CSV.
 
-procedure TForm1.VSaggregateAfterCalculate(Sender: TObject);
-begin
-  LabelTotal.Caption := FormatFloat('0.00', VSaggregate.TotalValue);
-end;
-7. Observações importantes
-Ordem origem → destino: configure primeiro os datasets e campos em Sources, depois o destino (TargetDataSet + TargetFieldName).
+Sources.ImportFromCSV(FileName) → Importa campos de um arquivo CSV.
 
-AutoRecalc: se ativado, o componente intercepta eventos dos datasets (AfterPost, AfterDelete, AfterScroll) e recalcula automaticamente.
+⚠️ Observações
+O DataSet deve estar ativo antes de calcular.
 
-Eventos originais preservados: o componente encadeia os handlers originais, não sobrescreve.
+Se AutoRecalc = True, não é necessário chamar CalcularTotal manualmente.
 
-Performance: em datasets grandes, o cálculo percorre todos os registros. Se precisar de mais performance, use SQL com SUM diretamente no banco.
-
-DecimalPlaces: controla arredondamento do resultado.
+Alterar o DataSet limpa os campos selecionados em Sources.
